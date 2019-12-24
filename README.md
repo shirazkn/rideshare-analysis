@@ -12,10 +12,7 @@ The description of the data, as given on the CoC website,
 <i> <p> &ensp;&ensp;&ensp;&ensp; "All trips, starting November 2018,
 reported by Transportation Network Providers (sometimes called rideshare
 companies) to the City of Chicago as part of routine reporting required
-by ordinance. <p> &ensp;&ensp;&ensp;&ensp; Census Tracts are suppressed
-in some cases, and times are rounded to the nearest 15 minutes. Fares
-are rounded to the nearest $2.50 and tips are rounded to the nearest
-$1.00." </i>
+by ordinance." </i>
 
 A visual overview of the dataset can be found
 [here](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips-Dashboard/pvbr-dkbf).

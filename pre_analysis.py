@@ -1,67 +1,102 @@
 # General statistical analysis methods to pre-analyze the data
 # such as scatter-plots, correlations...
 
-from classes import Variable
-import matplotlib.pyplot as plt
+import json
+from datetime import datetime, time
+import numpy as np
+
+# The oldest date in data
+DATA_START_DATE = None
 
 
-def scatter_xy(data, x: Variable, y: Variable, ax=None, position=None):
+# *------------------------* DATA PREPARATION *------------------------* #
+
+
+def show_null_columns(data):
     """
-    Makes a scatter-plot between x and y
+    Prints the columns in the dataset which have Null values
+    :param data: Pandas DataFrame obj
+    NOTE : There might be other columns with Null-like values, such as a string value "Unknown".
+    These will not be counted.
     """
-    data.plot(kind='scatter', x=x.col_name, y=y.col_name, s=0.8, ax=ax)
-    ax.set_xlabel(x.name.capitalize())
-    ax.set_ylabel(y.name.capitalize())
-
-    # <position> is used for generating legible subplots
-    if not position:
-        plt.title(f"{y.name.capitalize()} against {x.name.capitalize()}")
-
-    else:
-        if position == "inner":
-            ax.xaxis.label.set_visible(False)
-            ax.yaxis.label.set_visible(False)
-            ax.set_xticks([])
-            ax.set_yticks([])
-
-        elif position == "left":
-            ax.xaxis.label.set_visible(False)
-            ax.set_xticks([])
-
-        elif position == "bottom":
-            ax.yaxis.label.set_visible(False)
-            ax.set_yticks([])
-
-        elif position == "corner":
-            pass
+    null_entries = {c: data.isnull().sum()[c] for c in data.keys()}
+    null_entries = {key: value for key, value in null_entries.items() if null_entries[key]}
+    print(f"The following columns have Null values: ")
+    print(json.dumps(null_entries, indent=4, sort_keys=True, default=str), "\n")
 
 
-def scatter_grid(data, vars):
+# *--------------------* DATE/TIME MANIPULATION *--------------------* #
+
+def set_start_date(data_dates):
+    global DATA_START_DATE
+    DATA_START_DATE = data_dates.min()
+
+
+def get_datetime_from_str(timestamp):
     """
-    Makes a pairwise correlation grid as subplots
+    Returns datetime.datetime object from timestamp strings like 08/03/2019 08:15:00 PM
     """
-    fig, axes = plt.subplots(nrows=len(vars), ncols=len(vars))
-    axis = [0, 0]
-    for v1 in vars.values():
-        axis[1] = 0
-        for v2 in vars.values():
-            position = "inner"
-            if axis[0] == len(vars) - 1:
-                position = "bottom" if axis[1] else "corner"
-            elif axis[1] == 0:
-                position = "left"
-            scatter_xy(data, y=v1, x=v2, ax=axes[axis[0], axis[1]], position=position)
-            axis[1] += 1
-        axis[0] += 1
+    return datetime.strptime(timestamp, "%m/%d/%Y %I:%M:%S %p")
 
+
+def get_days_in_data(dt):
+    """
+    Returns no. of days passed since start of data-set
+    So <DATA_START_DATE, DATA_START_DATE+1, ... > are mapped to <0, 1, ... >
+    """
+    return (dt - DATA_START_DATE).days
+
+
+def get_minutes_in_day(dt):
+    """
+    Returns the no. of minutes that transpired in the day
+    """
+    return dt.hour*60 + dt.minute
+
+
+def get_day_in_week(dt):
+    """
+    Returns day of week, with 0: Monday and 6: Sunday
+    """
+    return dt.weekday()
+
+
+def get_str_from_minutes(minutes):
+    """
+    Useful for plotting
+    :param minutes: Output of get_minutes_in_day
+    :return: str ("11:59 PM")
+    """
+    dt = time(int(np.floor(minutes / 60)), int(minutes % 60), 0)
+    return time.strftime(dt, "%I:%M %p")
+
+
+def change_xticks_to_time(plot, n_ticks=6):
+    """
+    Maps x-axis of a plot from Time (Minutes) to Time (%H:%M %p)
+    """
+    ticks = np.linspace(0, 1440, n_ticks)
+    tick_labels = [get_str_from_minutes(t) for t in ticks[:-1]]
+    tick_labels.append(tick_labels[0])
+    plot.set_xticks(ticks)
+    plot.set_xticklabels(tick_labels)
+
+
+def minutes_in_day(points=1440):
+    return np.linspace(0, 1440, points)
+
+
+# *------------------------------* OTHER *------------------------------* #
 
 def correlation_matrix(data, col_names):
     """
     Returns the correlation matrix between variables in <col_names>
+    :param data: Pandas DataFrame obj
+    :param col_names: Names of columns which you want to Analyze
     """
     corr_matrix = data.corr()
     for c in corr_matrix.columns:
-        if c not in col_names.keys():
+        if c not in col_names:
             corr_matrix = corr_matrix.drop(c, axis=0).drop(c, axis=1)
 
     return corr_matrix
