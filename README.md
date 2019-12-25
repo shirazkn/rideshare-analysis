@@ -1,6 +1,8 @@
 #### Analyzing Chicago's Rideshare Trips
 as part of my STAT525 Course Project at Purdue
 *** 
+[Here](https://github.com/shirazkn/rideshare-analysis/blob/master/chicago-data.ipynb)'s a notebook file, and [here](https://github.com/shirazkn/rideshare-analysis/blob/master/Shiraz_Khan_STAT525Report.pdf)'s my course project report.<br>
+<br>
 The dataset, provided by the City of Chicago, can be downloaded from
 [here](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p).
 It consists of all the rideshare (presumably Uber/Lyft) trips taken in
